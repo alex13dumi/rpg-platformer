@@ -49,8 +49,8 @@ void RenderWindow::render(Entity& p_entity)
     SDL_Rect dst;
     dst.x = p_entity.getPos()._x * 4;
     dst.y = p_entity.getPos()._y * 4;
-    dst.w = p_entity.getCurrentFrame().w * 8;
-    dst.h = p_entity.getCurrentFrame().h * 8;
+    dst.w = p_entity.getCurrentFrame().w * p_entity.getResize()._x;
+    dst.h = p_entity.getCurrentFrame().h * p_entity.getResize()._y;
     SDL_RenderCopy(_renderer, p_entity.getText(), &src, &dst);
 }
 
