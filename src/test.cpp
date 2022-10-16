@@ -1,11 +1,18 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_surface.h>
 #include <iostream>
 #include <vector>
 #include <chrono>
 #include <RenderWindow.hpp>
 #include <Entity.hpp>
 #include <System.hpp>
+
+#define WIDTH 1280
+#define HEIGHT 720
+
+typedef std::chrono::high_resolution_clock Clock;
+
 
 int main(int argc, char* args[])
 {
@@ -18,34 +25,32 @@ int main(int argc, char* args[])
     if (!(IMG_Init(IMG_INIT_PNG)))
         std::cout << "IMG_init has failed. Error: " << SDL_GetError() << std::endl;
 
-    RenderWindow window("GAME v1.0", 1280, 720);
+    RenderWindow window("GAME v1.0", WIDTH, HEIGHT);
 
+    /*Load textures*/
     SDL_Texture* grassTexture = window.loadTexture("../res/gfx/grass.png");
-    SDL_Texture* adventurerTexture = window.loadTexture("../res/gfx/adventurer-sheet.png");
+    SDL_Texture *hero = window.loadTexture("../res/gfx/adventurer-sheet.png");
 
     std::vector<Entity> entitiees = {Entity( Vector2f(0, 120), grassTexture, Vector2f(8,8)),
                                      Entity( Vector2f(64, 120), grassTexture, Vector2f(8,8)),
                                      Entity( Vector2f(128, 120), grassTexture, Vector2f(8,8)),
                                      Entity( Vector2f(192, 120), grassTexture, Vector2f(8,8)),
-                                     Entity( Vector2f(256, 120), grassTexture, Vector2f(8,8)),
-                                     Entity( Vector2f(30, 0), adventurerTexture, Vector2f(2, 2))};
+                                     Entity( Vector2f(256, 120), grassTexture, Vector2f(8,8))};
 
-    bool gameRunning = true;
 
-    SDL_Event event;
+    std::vector<SDL_Rect*> rects;
 
-    /*Sprite animations: test*/
-    std::vector<SDL_Rect> rects;
-    /*Select the size of photo*/
-    std::size_t nbRow = 11;
-    std::size_t nbCol = 7;
-    std::size_t widthSpr = 50;
-    std::size_t heightSpr = 37;
+    size_t nbRow = 11;
+    size_t nbCol = 7;
+    size_t widthSpr = 50;
+    size_t heightSpr = 37;
 
-    for(std::size_t i = 0; i < nbRow; i++)
-        for(std::size_t j = 0; j < nbCol; j++)
-            rects.push_back(SDL_Rect{ (int) (j*widthSpr), (int) (i * heightSpr), (int) widthSpr, (int) heightSpr });
 
+    for (size_t i = 0; i < nbRow; i++) {
+        for (size_t j = 0; j < nbCol; j++) {
+            rects.push_back(new SDL_Rect{ (int) (j*widthSpr), (int) (i * heightSpr), (int) widthSpr, (int) heightSpr });
+        }
+    }
 
     std::vector<std::pair<size_t, size_t>> idle1  { {0, 0}, {0, 1}, {0, 2}, {0, 3} };
     std::vector<std::pair<size_t, size_t>> crouch { {0, 4}, {0, 5}, {0, 6}, {1, 0} };
@@ -70,60 +75,109 @@ int main(int argc, char* args[])
     double maxDuration = 150;
     double timeBuffer = 0;
     double timeElapsed = 0;
+    SDL_Event event;
+    bool gameRunning = true;
 
     while (gameRunning)
     {
-       double elapsedNano = 0;
-       auto t1 = std::chrono::high_resolution_clock::now();
-
-        // Get our controls and events
+        double elapsedNano = 0;
+        auto t1 = Clock::now();
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT)
                 gameRunning = false;
             else if (event.type == SDL_KEYDOWN) {
                 if (event.key.keysym.sym == SDLK_ESCAPE)
-                    gameRunning = false;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_Q)
+                    gameRunning = true;
+                if (event.key.keysym.scancode == SDL_SCANCODE_Q) {
                     current = idle1;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_W)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
                     current = crouch;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_E)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_E) {
                     current = run;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_R)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_R) {
                     current = jump;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_T)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_T) {
                     current = mid;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_Y)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_Y) {
                     current = fall;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_U)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_U) {
                     current = slide;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_I)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_I) {
                     current = grab;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_O)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_O) {
                     current = climb;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_P)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_P) {
                     current = idle2;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_A)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_A) {
                     current = attack1;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_S)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
                     current = attack2;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_D)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
                     current = attack3;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_F)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_F) {
                     current = hurt;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_G)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_G) {
                     current = die;
-                else if (event.key.keysym.scancode == SDL_SCANCODE_H)
+                }
+                else if (event.key.keysym.scancode == SDL_SCANCODE_H) {
                     current = jump;
-            }
-            index = 0;
-        }
-        window.clear();
+                }
 
-        for (Entity& e : entitiees)
-        {
-            window.render(e);
+                index = 0;
+            }
         }
+
+        window.clear();
+        for(auto e:entitiees)
+        window.render(e);
+
+        auto currentPair = current[index];
+        size_t position = currentPair.second + currentPair.first * nbCol;
+        SDL_RenderCopy(window.getRenderer(), hero, rects[position], NULL) ;
+        SDL_RenderPresent(window.getRenderer());
+
+        timeBuffer = timeBuffer + timeElapsed;
+
+        // update the animation
+        if (timeBuffer > maxDuration) {
+            timeBuffer = 0;
+            index++;
+
+            if (index >= current.size())
+                index = 0;
+        }
+
+        auto t2 = Clock::now();
+
+        elapsedNano = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
+
+        if (elapsedNano > 0) {
+            double diff = ((1000000000.f / 30.f) - elapsedNano) / 1000000.f;
+
+            if (diff > 0) {
+                SDL_Delay((Uint32)diff);
+            }
+        }
+
+        auto t3 = Clock::now();
+
+        timeElapsed = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count()) / 1000000.f;
+
+        /* update the screen */
         window.display();
     }
 
