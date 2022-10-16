@@ -5,7 +5,7 @@ project(SDL2Test)
 if(NOT SDL2_IMAGE_INCLUDE_DIR AND SDL2IMAGE_INCLUDE_DIR)
     set(SDL2_IMAGE_INCLUDE_DIR ${SDL2IMAGE_INCLUDE_DIR} CACHE PATH "directory cache entry initialized from old variable name")
 endif()
-find_path(SDL2_IMAGE_INCLUDE_DIR SDL_image.h
+find_path(SDL2_IMAGE_INCLUDE_DIR SDL_image.h SDL_gpu.h
         HINTS
         ENV SDL2IMAGEDIR
         ENV SDL2DIR
@@ -25,7 +25,7 @@ if(NOT SDL2_IMAGE_LIBRARY AND SDL2IMAGE_LIBRARY)
     set(SDL2_IMAGE_LIBRARY ${SDL2IMAGE_LIBRARY} CACHE FILEPATH "file cache entry initialized from old variable name")
 endif()
 find_library(SDL2_IMAGE_LIBRARY
-        NAMES SDL2_image
+        NAMES SDL2_image SDL2_gpu
         HINTS
         ENV SDL2IMAGEDIR
         ENV SDL2DIR
@@ -59,7 +59,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL2_image
         VERSION_VAR SDL2_IMAGE_VERSION_STRING)
 
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} include/)
-
-add_executable(SDL2Test src/test.cpp src/renderwindow.cpp src/system.cpp src/entity.cpp src/math.cpp)
-target_link_libraries(SDL2Test ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} include/ /usr/include/SDL2 )
+add_executable(SDL2Test src/test.cpp src/renderwindow.cpp src/system.cpp src/entity.cpp src/math.cpp src/sprites.cpp src/sprites.hpp)
+target_link_libraries(SDL2Test ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_GPU} libSDL2_gpu.so)
