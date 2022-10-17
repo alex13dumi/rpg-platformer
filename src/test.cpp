@@ -13,13 +13,12 @@
 
 typedef std::chrono::high_resolution_clock Clock;
 
-
 int main(int argc, char* args[])
 {
     System CPU;
     SDL_Log("Platform: %s, RAM: %d MB", CPU.getPlatform(), CPU.getRam());
 
-    if (SDL_Init(SDL_INIT_VIDEO) > 0)
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
         std::cout << "HEY.. SDL_Init HAS FAILED. SDL_ERROR: " << SDL_GetError() << std::endl;
 
     if (!(IMG_Init(IMG_INIT_PNG)))
@@ -29,7 +28,7 @@ int main(int argc, char* args[])
 
     /*Load textures*/
     SDL_Texture* grassTexture = window.loadTexture("../res/gfx/grass.png");
-    SDL_Texture *hero = window.loadTexture("../res/gfx/adventurer-sheet.png");
+    SDL_Texture* hero = window.loadTexture("../res/gfx/adventurer-sheet.png");
 
     std::vector<Entity> entitiees = {Entity( Vector2f(0, 120), grassTexture, Vector2f(8,8)),
                                      Entity( Vector2f(64, 120), grassTexture, Vector2f(8,8)),
@@ -39,12 +38,11 @@ int main(int argc, char* args[])
 
 
     std::vector<SDL_Rect*> rects;
-
+    /* Each sprite is an 50 x 37 images. TO DO: Store them in a JSON LUA data file*/
     size_t nbRow = 11;
     size_t nbCol = 7;
     size_t widthSpr = 50;
     size_t heightSpr = 37;
-
 
     for (size_t i = 0; i < nbRow; i++) {
         for (size_t j = 0; j < nbCol; j++) {
@@ -83,8 +81,12 @@ int main(int argc, char* args[])
         double elapsedNano = 0;
         auto t1 = Clock::now();
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT)
+            if (event.key.keysym.sym == SDLK_ESCAPE | event.type == SDL_QUIT ) {
                 gameRunning = false;
+                SDL_Log("Closing game...");
+                SDL_Quit();
+            }
+            /* Each time a key is pressed a new animation sequence starts.*/
             else if (event.type == SDL_KEYDOWN) {
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     gameRunning = true;
@@ -136,18 +138,23 @@ int main(int argc, char* args[])
                 else if (event.key.keysym.scancode == SDL_SCANCODE_H) {
                     current = jump;
                 }
-
                 index = 0;
             }
         }
 
         window.clear();
+        /*After the event loop we can start the rendering*/
         for(auto e:entitiees)
-        window.render(e);
+            window.render(e);
 
-        auto currentPair = current[index];
+        std::pair<size_t, size_t> currentPair = current[index];
         size_t position = currentPair.second + currentPair.first * nbCol;
-        SDL_RenderCopy(window.getRenderer(), hero, rects[position], NULL) ;
+        SDL_Rect * dstrect;
+        SDL_Rect dst = {256, 394, 120, 120};
+        dstrect = &dst;
+        SDL_RenderCopy(window.getRenderer(), hero, rects[position], dstrect);
+
+        /*Updates the screen*/
         SDL_RenderPresent(window.getRenderer());
 
         timeBuffer = timeBuffer + timeElapsed;
@@ -166,7 +173,7 @@ int main(int argc, char* args[])
         elapsedNano = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 
         if (elapsedNano > 0) {
-            double diff = ((1000000000.f / 30.f) - elapsedNano) / 1000000.f;
+            double diff = ((1000000000.f / 60.f) - elapsedNano) / 1000000.f;
 
             if (diff > 0) {
                 SDL_Delay((Uint32)diff);
@@ -182,6 +189,10 @@ int main(int argc, char* args[])
     }
 
     window.cleanUp();
+    for(auto e: entitiees)
+        SDL_DestroyTexture(e.getText());
+    SDL_DestroyTexture(hero);
+    SDL_DestroyRenderer(window.getRenderer());
     SDL_Quit();
 
     return 0;
