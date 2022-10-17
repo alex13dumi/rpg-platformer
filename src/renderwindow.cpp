@@ -7,7 +7,9 @@
 RenderWindow::RenderWindow(const char* p_title, int p_w, int p_h)
         :_window(NULL), _renderer(NULL)
 {
-    _window = SDL_CreateWindow(p_title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, p_w, p_h, SDL_WINDOW_SHOWN);
+    Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_INIT_VIDEO;
+    _window = SDL_CreateWindow(p_title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, p_w, p_h, flags);
+
 
     if (_window == NULL)
     {
@@ -58,3 +60,6 @@ void RenderWindow::display()
 {
     SDL_RenderPresent(_renderer);
 }
+
+SDL_Window* RenderWindow::getWindow() { return _window; }
+SDL_Renderer* RenderWindow::getRenderer(){ return _renderer; }
