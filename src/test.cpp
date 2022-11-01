@@ -1,9 +1,9 @@
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_surface.h>
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_surface.h>
 #include <RenderWindow.hpp>
 #include <Entity.hpp>
 #include <System.hpp>
@@ -14,22 +14,40 @@
 
 typedef std::chrono::high_resolution_clock Clock;
 
-int main(int argc, char* args[])
-{
+bool init(){
+    /*Initialize SDL*/
     System CPU;
     SDL_Log("Platform: %s, RAM: %d MB", CPU.getPlatform(), CPU.getRam());
 
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-        std::cout << "HEY.. SDL_Init HAS FAILED. SDL_ERROR: " << SDL_GetError() << std::endl;
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        std::cout << "HEY.. SDL_Init HAS FAILED. SDL_Error: " << SDL_GetError() << std::endl;
+        return false;
+    }
+    else if (!(IMG_Init(IMG_INIT_PNG))){
+        std::cout << "IMG_init has failed. SDL_Error: " << SDL_GetError() << std::endl;
+        return false;
+    }
+    SDL_Log("Succesfully initialised ! Let's play the game !");
+    return true;
+}
 
-    if (!(IMG_Init(IMG_INIT_PNG)))
-        std::cout << "IMG_init has failed. Error: " << SDL_GetError() << std::endl;
-
+int main(int argc, char* args[]) {
+    if(!init()){
+        SDL_Log("Cannot initialize SDL ! ");
+    }
+    /*Creates a window*/
     RenderWindow window("GAME v1.0", WIDTH, HEIGHT);
-
     /*Load textures*/
-    SDL_Texture* grassTexture = window.loadTexture("../res/gfx/grass.png");
+    SDL_Texture *grassTexture = window.loadTexture("../res/gfx/grass.png");
+    if (grassTexture == NULL){
+        SDL_Log("Couldn't load grass texture !");
+        return 1;
+    }
     SDL_Texture* heroTexture = window.loadTexture("../res/gfx/adventurer-sheet.png");
+    if (heroTexture == NULL){
+        SDL_Log("Couldn't load main hero texture !");
+        return 1;
+    }
 
     std::vector<Entity> entitiees = {Entity( Vector2f(0, 120), grassTexture, Vector2f(8,8)),
                                      Entity( Vector2f(64, 120), grassTexture, Vector2f(8,8)),
@@ -61,22 +79,30 @@ int main(int argc, char* args[])
         double elapsedNano = 0;
         auto t1 = Clock::now();
         while (SDL_PollEvent(&event)) {
-            if (event.key.keysym.sym == SDLK_ESCAPE | event.type == SDL_QUIT ) {
+
+            if(event.window.type == SDL_WINDOWEVENT ){
+                switch (event.window.event) {
+                    case SDL_WINDOWEVENT_SHOWN:
+                    {
+                        SDL_Log("Window %d has been shown", event.window.windowID);
+                    }
+                }
+            }
+            else if (event.key.keysym.sym == SDLK_ESCAPE | event.type == SDL_QUIT ) {
                 gameRunning = false;
                 SDL_Log("Closing game...");
                 SDL_Quit();
             }
             /* Each time a key is pressed a new animation sequence starts.*/
             else if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_ESCAPE)
-                    gameRunning = true;
+                SDL_Log("User pressed down a key");
                 if (event.key.keysym.scancode == SDL_SCANCODE_Q) {
                     current = hero.idle1;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
                     current = hero.crouch;
                 }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_E) {
+                else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
                     current = hero.run;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_R) {
@@ -106,7 +132,7 @@ int main(int argc, char* args[])
                 else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
                     current = hero.attack2;
                 }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
+                else if (event.key.keysym.scancode == SDL_SCANCODE_E) {
                     current = hero.attack3;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_F) {
@@ -139,7 +165,7 @@ int main(int argc, char* args[])
 
         timeBuffer = timeBuffer + timeElapsed;
 
-        // update the animation
+        /* update the animation*/
         if (timeBuffer > maxDuration) {
             timeBuffer = 0;
             index++;
