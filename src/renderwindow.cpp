@@ -10,19 +10,32 @@ RenderWindow::RenderWindow(const char* p_title, int p_w, int p_h)
     Uint32 flags = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_INIT_VIDEO;
     _window = SDL_CreateWindow(p_title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, p_w, p_h, flags);
 
-
-    if (_window == NULL)
-    {
+    if (_window == NULL){
         std::cout << "Window failed to init. Error: " << SDL_GetError() << std::endl;
     }
 
     _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
 }
 
-SDL_Texture* RenderWindow::loadTexture(const char* p_filePath)
-{
+bool RenderWindow::loadTextures(){
+    SDL_Texture* grassTexture = loadTexture("../res/gfx/grass.png");
+    if (grassTexture == NULL){
+        SDL_Log("Couldn't load grass texture !");
+        return false;
+    }
+    SDL_Texture* heroTexture = loadTexture("../res/gfx/adventurer-sheet.png");
+    if (heroTexture == NULL){
+        SDL_Log("Couldn't load main hero texture !");
+        return false;
+    }
+    _textures.emplace_back(grassTexture);
+    _textures.emplace_back(heroTexture);
+    return true;
+}
+
+SDL_Texture* RenderWindow::loadTexture(const char* path){
     SDL_Texture* texture = NULL;
-    texture = IMG_LoadTexture(_renderer, p_filePath);
+    texture = IMG_LoadTexture(_renderer, path);
 
     if (texture == NULL)
         SDL_Log("Failed to load texture. Error: %s", SDL_GetError());
@@ -56,10 +69,12 @@ void RenderWindow::render(Entity& p_entity)
     SDL_RenderCopy(_renderer, p_entity.getText(), &src, &dst);
 }
 
-void RenderWindow::display()
+void RenderWindow::refresh()
 {
     SDL_RenderPresent(_renderer);
+
 }
 
 SDL_Window* RenderWindow::getWindow() { return _window; }
 SDL_Renderer* RenderWindow::getRenderer(){ return _renderer; }
+std::vector<SDL_Texture*> RenderWindow::getTextures(){ return _textures; }
