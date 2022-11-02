@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <cassert>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_surface.h>
@@ -11,10 +12,12 @@
 
 #define WIDTH 1280
 #define HEIGHT 720
+/*#define assertm(exp, msg) assert(((void)msg, exp))*/
+#define assertm(exp, msg) assert((msg, exp))
 
 typedef std::chrono::high_resolution_clock Clock;
 
-bool init(){
+int main(int argc, char* args[]) {
     /*Initialize SDL*/
     System CPU;
     SDL_Log("Platform: %s, RAM: %d MB", CPU.getPlatform(), CPU.getRam());
@@ -28,58 +31,36 @@ bool init(){
         return false;
     }
     SDL_Log("Succesfully initialised ! Let's play the game !");
-    return true;
-}
-
-int main(int argc, char* args[]) {
-    if(!init()){
-        SDL_Log("Cannot initialize SDL ! ");
-    }
     /*Creates a window*/
     RenderWindow window("GAME v1.0", WIDTH, HEIGHT);
     /*Load textures*/
-    SDL_Texture *grassTexture = window.loadTexture("../res/gfx/grass.png");
-    if (grassTexture == NULL){
-        SDL_Log("Couldn't load grass texture !");
-        return 1;
-    }
-    SDL_Texture* heroTexture = window.loadTexture("../res/gfx/adventurer-sheet.png");
-    if (heroTexture == NULL){
-        SDL_Log("Couldn't load main hero texture !");
-        return 1;
-    }
+    assertm(window.loadTextures(), "Couldn't load textures");
 
-    std::vector<Entity> entitiees = {Entity( Vector2f(0, 120), grassTexture, Vector2f(8,8)),
-                                     Entity( Vector2f(64, 120), grassTexture, Vector2f(8,8)),
-                                     Entity( Vector2f(128, 120), grassTexture, Vector2f(8,8)),
-                                     Entity( Vector2f(192, 120), grassTexture, Vector2f(8,8)),
-                                     Entity( Vector2f(256, 120), grassTexture, Vector2f(8,8))};
+    std::vector<Entity> entitiees = {Entity( Vector2f(0, 120), window.getTextures()[0], Vector2f(8,8)),
+                                     Entity( Vector2f(64, 120), window.getTextures()[0], Vector2f(8,8)),
+                                     Entity( Vector2f(128, 120), window.getTextures()[0], Vector2f(8,8)),
+                                     Entity( Vector2f(192, 120), window.getTextures()[0], Vector2f(8,8)),
+                                     Entity( Vector2f(256, 120), window.getTextures()[0], Vector2f(8,8))};
 
-
-    std::vector<SDL_Rect*> rects;
     /* Each sprite is an 50 x 37 images. TO DO: Store them in a JSON LUA data file*/
     Hero hero(11, 7, 50, 37);
-
-    for (std::size_t i = 0; i < hero._row; i++) {
-        for (std::size_t j = 0; j < hero._col; j++) {
-            rects.push_back(new SDL_Rect{ (int) (j*hero._width), (int) (i * hero._height), (int) hero._width, (int) hero._height });
-        }
-    }
-    Vector current = hero.idle1;
+    /*Allocate memory for animations that are gonna be added for the hero*/
+    hero.addRects();
+    /*Select current_hero_animation animation for the hero*/
+    Vector current_hero_animation = hero.idle1;
     size_t index = 0;
 
     double maxDuration = 150;
     double timeBuffer = 0;
     double timeElapsed = 0;
-    SDL_Event event;
     bool gameRunning = true;
+    SDL_Event event;
 
     while (gameRunning)
     {
         double elapsedNano = 0;
         auto t1 = Clock::now();
         while (SDL_PollEvent(&event)) {
-
             if(event.window.type == SDL_WINDOWEVENT ){
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_SHOWN:
@@ -97,52 +78,52 @@ int main(int argc, char* args[]) {
             else if (event.type == SDL_KEYDOWN) {
                 SDL_Log("User pressed down a key");
                 if (event.key.keysym.scancode == SDL_SCANCODE_Q) {
-                    current = hero.idle1;
+                    current_hero_animation = hero.idle1;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-                    current = hero.crouch;
+                    current_hero_animation = hero.crouch;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
-                    current = hero.run;
+                    current_hero_animation = hero.run;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_R) {
-                    current = hero.jump;
+                    current_hero_animation = hero.jump;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_T) {
-                    current = hero.mid;
+                    current_hero_animation = hero.mid;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_Y) {
-                    current = hero.fall;
+                    current_hero_animation = hero.fall;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_U) {
-                    current = hero.slide;
+                    current_hero_animation = hero.slide;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_I) {
-                    current = hero.grab;
+                    current_hero_animation = hero.grab;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_O) {
-                    current = hero.climb;
+                    current_hero_animation = hero.climb;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_P) {
-                    current = hero.idle2;
+                    current_hero_animation = hero.idle2;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_A) {
-                    current = hero.attack1;
+                    current_hero_animation = hero.attack1;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
-                    current = hero.attack2;
+                    current_hero_animation = hero.attack2;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_E) {
-                    current = hero.attack3;
+                    current_hero_animation = hero.attack3;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_F) {
-                    current = hero.hurt;
+                    current_hero_animation = hero.hurt;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_G) {
-                    current = hero.die;
+                    current_hero_animation = hero.die;
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_H) {
-                    current = hero.jump;
+                    current_hero_animation = hero.jump;
                 }
                 index = 0;
             }
@@ -153,16 +134,15 @@ int main(int argc, char* args[]) {
         for(auto e:entitiees)
             window.render(e);
 
-        std::pair<size_t, size_t> currentPair = current[index];
-        size_t position = currentPair.second + currentPair.first * hero._col;
-        SDL_Rect * dstrect;
+        std::pair<size_t, size_t> current_hero_animationPair = current_hero_animation[index];
+        size_t position = current_hero_animationPair.second + current_hero_animationPair.first * hero._col;
+        SDL_Rect* dstrect;
         SDL_Rect dst = {256, 394, 120, 120};
         dstrect = &dst;
-        SDL_RenderCopy(window.getRenderer(), heroTexture, rects[position], dstrect);
+        SDL_RenderCopy(window.getRenderer(), window.getTextures()[1], hero.rects[position], dstrect);
 
         /*Updates the screen*/
-        SDL_RenderPresent(window.getRenderer());
-
+        window.refresh();
         timeBuffer = timeBuffer + timeElapsed;
 
         /* update the animation*/
@@ -170,7 +150,7 @@ int main(int argc, char* args[]) {
             timeBuffer = 0;
             index++;
 
-            if (index >= current.size())
+            if (index >= current_hero_animation.size())
                 index = 0;
         }
 
@@ -191,13 +171,13 @@ int main(int argc, char* args[]) {
         timeElapsed = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count()) / 1000000.f;
 
         /* update the screen */
-        window.display();
+        window.refresh();
     }
 
     window.cleanUp();
     for(auto e: entitiees)
         SDL_DestroyTexture(e.getText());
-    SDL_DestroyTexture(heroTexture);
+    SDL_DestroyTexture(window.getTextures()[0]);
     SDL_DestroyRenderer(window.getRenderer());
     SDL_Quit();
 
