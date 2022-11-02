@@ -2,6 +2,7 @@
 #define SDL2TEST_SPRITES_HPP
 #include <vector>
 #include <cstddef>
+#include <SDL_rect.h>
 #define Vector std::vector<std::pair<std::size_t, std::size_t>>
 
 struct Hero{
@@ -9,6 +10,7 @@ struct Hero{
     std::size_t _col;
     std::size_t _width;
     std::size_t _height;
+    std::vector<SDL_Rect*> rects;
 
     Vector idle1  {{0, 0}, {0, 1}, {0, 2}, {0, 3}};
     Vector crouch {{0, 4}, {0, 5}, {0, 6}, {1, 0}};
@@ -29,5 +31,6 @@ struct Hero{
 
     Hero();
     Hero(std::size_t row, std::size_t col, std::size_t widht, std::size_t height);
+    void addRects();
 };
 #endif //SDL2TEST_SPRITES_HPP
