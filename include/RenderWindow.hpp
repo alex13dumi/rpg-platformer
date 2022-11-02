@@ -9,14 +9,17 @@ class RenderWindow
 public:
 	RenderWindow(const char* p_title, int p_w, int p_h);
     ~RenderWindow() = default;
-    SDL_Texture* loadTexture(const char* p_filePath);
+    bool loadTextures();
+    SDL_Texture* loadTexture(const char* path);
     void cleanUp();
     void clear();
     void render(Entity& p_entity);
-    void display();
+    void refresh();
     SDL_Window* getWindow();
     SDL_Renderer* getRenderer();
+    std::vector<SDL_Texture*> getTextures();
 private:
 	SDL_Window* _window;
 	SDL_Renderer* _renderer;
+    std::vector<SDL_Texture*> _textures;
 };
