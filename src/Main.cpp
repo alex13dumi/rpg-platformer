@@ -3,44 +3,22 @@
 #include <chrono>
 #include <cassert>
 #include <SDL.h>
-#include <SDL_image.h>
 #include <SDL_surface.h>
 #include <RenderWindow.hpp>
-#include <Entity.hpp>
-#include <System.hpp>
 #include <Sprites.hpp>
 
 #define WIDTH 1280
 #define HEIGHT 720
-/*#define assertm(exp, msg) assert(((void)msg, exp))*/
 #define assertm(exp, msg) assert((msg, exp))
+/*#define assertm(exp, msg) assert(((void)msg, exp))*/
 
 typedef std::chrono::high_resolution_clock Clock;
 
 int main(int argc, char* args[]) {
-    /*Initialize SDL*/
-    System CPU;
-    SDL_Log("Platform: %s, RAM: %d MB", CPU.getPlatform(), CPU.getRam());
-
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        std::cout << "HEY.. SDL_Init HAS FAILED. SDL_Error: " << SDL_GetError() << std::endl;
-        return false;
-    }
-    else if (!(IMG_Init(IMG_INIT_PNG))){
-        std::cout << "IMG_init has failed. SDL_Error: " << SDL_GetError() << std::endl;
-        return false;
-    }
-    SDL_Log("Succesfully initialised ! Let's play the game !");
-    /*Creates a window*/
+    /*Initializez SDL and creates a window*/
     RenderWindow window("GAME v1.0", WIDTH, HEIGHT);
     /*Load textures*/
     assertm(window.loadTextures(), "Couldn't load textures");
-
-    std::vector<Entity> entitiees = {Entity( Vector2f(0, 120), window.getTextures()[0], Vector2f(8,8)),
-                                     Entity( Vector2f(64, 120), window.getTextures()[0], Vector2f(8,8)),
-                                     Entity( Vector2f(128, 120), window.getTextures()[0], Vector2f(8,8)),
-                                     Entity( Vector2f(192, 120), window.getTextures()[0], Vector2f(8,8)),
-                                     Entity( Vector2f(256, 120), window.getTextures()[0], Vector2f(8,8))};
 
     /* Each sprite is an 50 x 37 images. TO DO: Store them in a JSON LUA data file*/
     Hero hero(11, 7, 50, 37);
@@ -131,15 +109,12 @@ int main(int argc, char* args[]) {
 
         window.clear();
         /*After the event loop we can start the rendering*/
-        for(auto e:entitiees)
-            window.render(e);
-
-        std::pair<size_t, size_t> current_hero_animationPair = current_hero_animation[index];
-        size_t position = current_hero_animationPair.second + current_hero_animationPair.first * hero._col;
+        size_t position = current_hero_animation[index].second + current_hero_animation[index].first * hero._col;
         SDL_Rect* dstrect;
         SDL_Rect dst = {256, 394, 120, 120};
         dstrect = &dst;
-        SDL_RenderCopy(window.getRenderer(), window.getTextures()[1], hero.rects[position], dstrect);
+        //window.render(window.getTextures()[1], hero.rects[position], dstrect);
+        window.render(window.getTextures()[1], hero.rects[position], dstrect);
 
         /*Updates the screen*/
         window.refresh();
@@ -175,8 +150,7 @@ int main(int argc, char* args[]) {
     }
 
     window.cleanUp();
-    for(auto e: entitiees)
-        SDL_DestroyTexture(e.getText());
+
     SDL_DestroyTexture(window.getTextures()[0]);
     SDL_DestroyRenderer(window.getRenderer());
     SDL_Quit();

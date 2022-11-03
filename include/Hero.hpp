@@ -1,16 +1,19 @@
-#ifndef SDL2TEST_SPRITES_HPP
-#define SDL2TEST_SPRITES_HPP
+#ifndef SDL2TEST_HERO_HPP
+#define SDL2TEST_HERO_HPP
+#include <SDL.h>
 #include <vector>
-#include <cstddef>
-#include <SDL_rect.h>
+#include <string>
 #define Vector std::vector<std::pair<std::size_t, std::size_t>>
 
-struct Hero{
-    std::size_t _row;
-    std::size_t _col;
-    std::size_t _width;
-    std::size_t _height;
-    std::vector<SDL_Rect*> rects;
+class Hero
+{
+public:
+    Hero(std::string name, uint8_t health, uint8_t speed, uint16_t attack, std::size_t _row, std::size_t _col, std::size_t _width, std::size_t _height);
+    ~Hero();
+    void upload_animation();
+    void move();
+    std::size_t _row,_col,_width,_height;
+    std::vector<SDL_Rect*> frame_rects;
 
     Vector idle1  {{0, 0}, {0, 1}, {0, 2}, {0, 3}};
     Vector crouch {{0, 4}, {0, 5}, {0, 6}, {1, 0}};
@@ -28,9 +31,10 @@ struct Hero{
     Vector hurt   {{8, 3}, {8, 4}, {8, 5}};
     Vector die    {{8, 6}, {9, 0}, {9, 1}, {9, 2}, {9, 3}, {9, 4}, {9, 5}};
     Vector jump2  {{9, 6}, {10, 0}, {10, 1}};
-
-    Hero();
-    Hero(std::size_t row, std::size_t col, std::size_t widht, std::size_t height);
-    void addRects();
+private:
+    std::string _name;
+    uint8_t _health;
+    uint8_t _speed;
+    uint16_t _attack;
 };
-#endif //SDL2TEST_SPRITES_HPP
+#endif //SDL2TEST_HERO_HPP
