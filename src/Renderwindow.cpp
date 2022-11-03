@@ -35,18 +35,12 @@ bool RenderWindow::loadTextures(){
         SDL_Log("Couldn't load grass texture !");
         return false;
     }
-    SDL_Texture* heroTexture = loadTexture("../res/gfx/adventurer-sheet.png");
-    if (heroTexture == NULL){
-        SDL_Log("Couldn't load main hero texture !");
-        return false;
-    }
     SDL_Texture* backgroundTexture = loadTexture("../res/gfx/background.png");
     if (backgroundTexture == NULL){
         SDL_Log("Couldn't load background !");
         return false;
     }
     _textures.emplace_back(grassTexture);
-    _textures.emplace_back(heroTexture);
     _textures.emplace_back(backgroundTexture);
     return true;
 }
@@ -55,9 +49,10 @@ SDL_Texture* RenderWindow::loadTexture(const char* path){
     SDL_Texture* texture = NULL;
     texture = IMG_LoadTexture(_renderer, path);
 
-    if (texture == NULL)
+    if (texture == NULL) {
         SDL_Log("Failed to load texture. Error: %s", SDL_GetError());
-
+        exit(0);
+    }
     return texture;
 }
 
@@ -65,17 +60,11 @@ void RenderWindow::cleanUp()
 {
     SDL_DestroyWindow(_window);
     SDL_DestroyRenderer(_renderer);
-
 }
 
 void RenderWindow::clear()
 {
     SDL_RenderClear(_renderer);
-}
-
-void RenderWindow::render(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dst)
-{
-    SDL_RenderCopy(_renderer, texture, src, dst);
 }
 
 void RenderWindow::refresh()

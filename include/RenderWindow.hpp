@@ -12,7 +12,6 @@ public:
     SDL_Texture* loadTexture(const char* path);
     void cleanUp();
     void clear();
-    void render(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dst);
     void refresh();
     SDL_Window* getWindow();
     SDL_Renderer* getRenderer();
