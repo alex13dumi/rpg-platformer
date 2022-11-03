@@ -5,7 +5,7 @@
 #include <SDL.h>
 #include <SDL_surface.h>
 #include <RenderWindow.hpp>
-#include <Sprites.hpp>
+#include <Hero.hpp>
 
 #define WIDTH 1280
 #define HEIGHT 720
@@ -21,9 +21,9 @@ int main(int argc, char* args[]) {
     assertm(window.loadTextures(), "Couldn't load textures");
 
     /* Each sprite is an 50 x 37 images. TO DO: Store them in a JSON LUA data file*/
-    Hero hero(11, 7, 50, 37);
+    Hero hero("John Baiat Bun", 100, 0, 10, 11, 7, 50, 37);
     /*Allocate memory for animations that are gonna be added for the hero*/
-    hero.addRects();
+    hero.upload_animation();
     /*Select current_hero_animation animation for the hero*/
     Vector current_hero_animation = hero.idle1;
     size_t index = 0;
@@ -114,7 +114,7 @@ int main(int argc, char* args[]) {
         SDL_Rect dst = {256, 394, 120, 120};
         dstrect = &dst;
         //window.render(window.getTextures()[1], hero.rects[position], dstrect);
-        window.render(window.getTextures()[1], hero.rects[position], dstrect);
+        window.render(window.getTextures()[1], hero.frame_rects[position], dstrect);
 
         /*Updates the screen*/
         window.refresh();
