@@ -1,3 +1,0 @@
-/home/alex13dumi/CLionProjects/rpg-platformer/cmake-build-debug/CMakeFiles/SDL2Test.dir
-/home/alex13dumi/CLionProjects/rpg-platformer/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/alex13dumi/CLionProjects/rpg-platformer/cmake-build-debug/CMakeFiles/rebuild_cache.dir
