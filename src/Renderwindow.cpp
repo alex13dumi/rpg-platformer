@@ -64,6 +64,8 @@ SDL_Texture* RenderWindow::loadTexture(const char* path){
 void RenderWindow::cleanUp()
 {
     SDL_DestroyWindow(_window);
+    SDL_DestroyRenderer(_renderer);
+
 }
 
 void RenderWindow::clear()
@@ -73,7 +75,7 @@ void RenderWindow::clear()
 
 void RenderWindow::render(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dst)
 {
-    SDL_RenderCopy(_renderer, texture, src, dst );
+    SDL_RenderCopy(_renderer, texture, src, dst);
 }
 
 void RenderWindow::refresh()
