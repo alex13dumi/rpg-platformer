@@ -1,7 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <Entity.hpp>
 #include <vector>
 
 class RenderWindow 
@@ -13,11 +12,12 @@ public:
     SDL_Texture* loadTexture(const char* path);
     void cleanUp();
     void clear();
-    void render(Entity& p_entity);
+    void render(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dst);
     void refresh();
     SDL_Window* getWindow();
     SDL_Renderer* getRenderer();
     std::vector<SDL_Texture*> getTextures();
+
 private:
 	SDL_Window* _window;
 	SDL_Renderer* _renderer;
