@@ -38,7 +38,7 @@ int main(int argc, char* args[]) {
     {
         double elapsedNano = 0;
         auto t1 = Clock::now();
-        while (SDL_PollEvent(&event)) {
+        while(SDL_PollEvent(&event)) {
             if(event.window.type == SDL_WINDOWEVENT ){
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_SHOWN:
@@ -55,57 +55,30 @@ int main(int argc, char* args[]) {
             /* Each time a key is pressed a new animation sequence starts.*/
             else if (event.type == SDL_KEYDOWN) {
                 SDL_Log("User pressed down a key");
-                if (event.key.keysym.scancode == SDL_SCANCODE_Q) {
-                    current_hero_animation = hero.idle1;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_W) {
-                    current_hero_animation = hero.crouch;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_D) {
-                    current_hero_animation = hero.run;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_R) {
-                    current_hero_animation = hero.jump;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_T) {
-                    current_hero_animation = hero.mid;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_Y) {
-                    current_hero_animation = hero.fall;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_U) {
-                    current_hero_animation = hero.slide;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_I) {
-                    current_hero_animation = hero.grab;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_O) {
-                    current_hero_animation = hero.climb;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_P) {
-                    current_hero_animation = hero.idle2;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_A) {
-                    current_hero_animation = hero.attack1;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_S) {
-                    current_hero_animation = hero.attack2;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_E) {
-                    current_hero_animation = hero.attack3;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_F) {
-                    current_hero_animation = hero.hurt;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_G) {
-                    current_hero_animation = hero.die;
-                }
-                else if (event.key.keysym.scancode == SDL_SCANCODE_H) {
-                    current_hero_animation = hero.jump;
+                switch (event.key.keysym.scancode) {
+                    case SDL_SCANCODE_Q: current_hero_animation = hero.idle1; break;
+                    case SDL_SCANCODE_W: current_hero_animation = hero.crouch; break;
+                    case SDL_SCANCODE_D: current_hero_animation = hero.run; break;
+                    case SDL_SCANCODE_R: current_hero_animation = hero.jump; break;
+                    case SDL_SCANCODE_T: current_hero_animation = hero.mid; break;
+                    case SDL_SCANCODE_Y: current_hero_animation = hero.fall; break;
+                    case SDL_SCANCODE_U: current_hero_animation = hero.slide; break;
+                    case SDL_SCANCODE_I: current_hero_animation = hero.grab; break;
+                    case SDL_SCANCODE_O: current_hero_animation = hero.climb; break;
+                    case SDL_SCANCODE_P: current_hero_animation = hero.idle2; break;
+                    case SDL_SCANCODE_A: current_hero_animation = hero.attack1; break;
+                    case SDL_SCANCODE_S: current_hero_animation = hero.attack2; break;
+                    case SDL_SCANCODE_E: current_hero_animation = hero.attack3; break;
+                    case SDL_SCANCODE_F: current_hero_animation = hero.hurt; break;
+                    case SDL_SCANCODE_G: current_hero_animation = hero.die; break;
+                    case SDL_SCANCODE_H: current_hero_animation = hero.jump; break;
                 }
                 index = 0;
             }
+            hero.handleEvent(event);
         }
+        hero.move();
+        window.refresh();
 
         window.clear();
         /*After the event loop we can start the rendering*/
@@ -114,7 +87,7 @@ int main(int argc, char* args[]) {
         SDL_Rect dst = {256, 394, 120, 120};
         dstrect = &dst;
         //window.render(window.getTextures()[1], hero.rects[position], dstrect);
-        window.render(window.getTextures()[1], hero.frame_rects[position], dstrect);
+        hero.render(window, hero.frame_rects[position], dstrect);
 
         /*Updates the screen*/
         window.refresh();
